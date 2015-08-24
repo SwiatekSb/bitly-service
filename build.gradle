@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.2.0.RELEASE'
+    }
+}
+
+apply plugin: 'spring-boot'
+
+version = '1.0'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-data-jpa"
+    compile 'com.h2database:h2:1.4.184'
+
+    testCompile 'org.springframework:spring-test:4.2.0.RELEASE'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
