@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -56,6 +57,30 @@ public class LinkControllerTest {
         mockMvc.perform(get("/rest/link/all"))
                 .andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteLink() throws Exception {
+        Link createdLink = new Link();
+        createdLink.setId(1L);
+        createdLink.setUrl("url");
+        createdLink.setEncodeUrl("encode");
+
+        when(service.deleteLink(1L)).thenReturn(createdLink);
+
+        mockMvc.perform(delete("/rest/link/1"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteLinkNoExistingLink() throws Exception {
+
+        when(service.deleteLink(1L)).thenReturn(null);
+
+        mockMvc.perform(delete("/rest/link/1"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
