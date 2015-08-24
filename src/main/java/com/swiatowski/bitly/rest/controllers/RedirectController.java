@@ -29,7 +29,12 @@ public class RedirectController {
     @ResponseBody
     public void sendRedirect(@PathVariable String encodeUrl, HttpServletResponse httpServletResponse) throws IOException {
         Link link = linkService.findByEncodeName(encodeUrl);
-        String url = link.getUrl();
-        httpServletResponse.sendRedirect(url);
+        if (link != null) {
+            String url = link.getUrl();
+            httpServletResponse.sendRedirect(url);
+        } else {
+            httpServletResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
+
 }
