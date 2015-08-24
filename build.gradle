@@ -8,6 +8,7 @@ buildscript {
 }
 
 apply plugin: 'spring-boot'
+apply plugin: 'war'
 
 version = '1.0'
 
