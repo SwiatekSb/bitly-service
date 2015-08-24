@@ -8,11 +8,13 @@ import com.swiatowski.bitly.core.services.util.LinkList;
  */
 public interface LinkService {
 
-    Link createLink(Link data);
+    Link createLink(String url);
 
     LinkList findAllLinks();
 
-    Link findByName(String url);
+    Link findLink(Long id);
+
+    Link deleteLink(Long id);
 
     Link findByEncodeName(String encodeUrl);
 

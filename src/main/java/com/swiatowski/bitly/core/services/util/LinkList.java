@@ -16,6 +16,10 @@ public class LinkList {
         linkList = new ArrayList();
     }
 
+    public LinkList(List<Link> linkList) {
+        this.linkList = linkList;
+    }
+
     public List<Link> getLinkList() {
         return linkList;
     }
