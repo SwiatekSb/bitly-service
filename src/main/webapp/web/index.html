@@ -3,8 +3,45 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Bitly</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 </head>
 <body>
+
+    <input id="inp" type="text" >
+    <button id="bitly" type="button">Create</button>
+    <a id="link" class="hide"></a>
+
+    <script type="text/javascript">
+        function createLink() {
+            $('#link').addClass('hide');
+
+            var restUrl = "/rest/link";
+            var url = $('#inp').val();
+
+            $.ajax({
+                type: "POST",
+                url: restUrl,
+                dataType: "json",
+                contentType: "text/plain",
+                data: url,
+                success: function (data) {
+                    var json = JSON.parse(JSON.stringify(data));
+
+                    var redirect = "http://localhost:8080/" + json['encodeUrl'];
+                    document.getElementById("link").innerHTML = redirect;
+                    document.getElementById("link").href = redirect;
+
+                    $('#link').removeClass('hide');
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $("#bitly").click(function () {
+                createLink();
+            });
+        });
+    </script>
 
 </body>
 </html>
