@@ -14,13 +14,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,9 +54,13 @@ public class LinkControllerTest {
 
         when(service.findAllLinks()).thenReturn(new LinkList(Lists.newArrayList(createdLink)));
 
-        mockMvc.perform(get("/rest/link/all"))
+        MvcResult result = mockMvc.perform(get("/rest/link/all"))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        assertEquals("{\"linkList\":[{\"id\":1,\"url\":\"url\",\"encodeUrl\":\"encode\"}],\"links\":[]}", content);
     }
 
     @Test
@@ -82,7 +86,6 @@ public class LinkControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
-
 
 
     @Test
@@ -114,6 +117,34 @@ public class LinkControllerTest {
                 .content("http://www.google.com")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void findLinkById() throws Exception {
+        Link createdLink = new Link();
+        createdLink.setId(1L);
+        createdLink.setUrl("url");
+        createdLink.setEncodeUrl("encode");
+
+        when(service.findLink(any(Long.class))).thenReturn(createdLink);
+
+        mockMvc.perform(get("/rest/link/1"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void findLinkByEncodeUrl() throws Exception {
+        Link createdLink = new Link();
+        createdLink.setId(1L);
+        createdLink.setUrl("url");
+        createdLink.setEncodeUrl("encode");
+
+        when(service.findByEncodeName(any(String.class))).thenReturn(createdLink);
+
+        mockMvc.perform(get("/rest/link/encode/encode"))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
 }

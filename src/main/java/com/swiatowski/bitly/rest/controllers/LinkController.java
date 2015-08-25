@@ -67,7 +67,7 @@ public class LinkController {
         }
     }
 
-    @RequestMapping(value = "/{encodeUrl}", method = RequestMethod.GET)
+    @RequestMapping(value = "/encode/{encodeUrl}", method = RequestMethod.GET)
     public ResponseEntity<LinkResource> getLinkByEncodeUrl(@PathVariable String encodeUrl) {
         Link link = linkService.findByEncodeName(encodeUrl);
         if (link != null) {
