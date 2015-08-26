@@ -3,6 +3,8 @@ package com.swiatowski.bitly.rest.controllers;
 import com.google.common.collect.Lists;
 import com.swiatowski.bitly.core.models.entities.Link;
 import com.swiatowski.bitly.core.services.LinkService;
+import com.swiatowski.bitly.core.services.LinkValidationService;
+import com.swiatowski.bitly.core.services.exceptions.LinkBadUrlException;
 import com.swiatowski.bitly.core.services.exceptions.LinkExistsException;
 import com.swiatowski.bitly.core.services.util.LinkList;
 import org.junit.Before;
@@ -19,7 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,6 +36,9 @@ public class LinkControllerTest {
 
     @Mock
     private LinkService service;
+
+    @Mock
+    private LinkValidationService linkValidationService;
 
     private MockMvc mockMvc;
 
@@ -96,6 +101,8 @@ public class LinkControllerTest {
         createdLink.setEncodeUrl("encode");
 
         when(service.createLink(any(String.class))).thenReturn(createdLink);
+        doNothing().when(linkValidationService).validateUrl(any(String.class));
+
 
         mockMvc.perform(post("/rest/link")
                 .content("http://www.google.com")
@@ -112,11 +119,28 @@ public class LinkControllerTest {
         createdLink.setEncodeUrl("encode");
 
         when(service.createLink(any(String.class))).thenThrow(new LinkExistsException());
+        doNothing().when(linkValidationService).validateUrl(any(String.class));
 
         mockMvc.perform(post("/rest/link")
                 .content("http://www.google.com")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void createLinkWithBadUrl() throws Exception {
+        Link createdLink = new Link();
+        createdLink.setId(1L);
+        createdLink.setUrl("url");
+        createdLink.setEncodeUrl("encode");
+
+        when(service.createLink(any(String.class))).thenThrow(new LinkExistsException());
+        doThrow(LinkBadUrlException.class).when(linkValidationService).validateUrl(any(String.class));
+
+        mockMvc.perform(post("/rest/link")
+                .content("http://www.google.com")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

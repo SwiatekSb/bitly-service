@@ -2,11 +2,11 @@ package com.swiatowski.bitly.rest.controllers;
 
 import com.swiatowski.bitly.core.models.entities.Link;
 import com.swiatowski.bitly.core.services.LinkService;
+import com.swiatowski.bitly.core.services.LinkValidationService;
+import com.swiatowski.bitly.core.services.exceptions.LinkBadUrlException;
 import com.swiatowski.bitly.core.services.exceptions.LinkExistsException;
-import com.swiatowski.bitly.rest.exceptions.ConflictException;
 import com.swiatowski.bitly.rest.resources.LinkListResource;
 import com.swiatowski.bitly.rest.resources.LinkResource;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,23 +20,23 @@ import org.springframework.web.bind.annotation.*;
 public class LinkController {
 
     private LinkService linkService;
+    private LinkValidationService linkValidationService;
 
     @Autowired
-    public LinkController(LinkService linkService) {
+    public LinkController(LinkService linkService, LinkValidationService linkValidationService) {
         this.linkService = linkService;
+        this.linkValidationService = linkValidationService;
     }
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<LinkResource> createLink(@RequestBody String url) {
         try {
-            final UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-            if (urlValidator.isValid(url)) {
-                return new ResponseEntity<LinkResource>(new LinkResource(linkService.createLink(url)), HttpStatus.CREATED);
-            } else {
-                return new ResponseEntity<LinkResource>(HttpStatus.BAD_REQUEST);
-            }
+            linkValidationService.validateUrl(url);
+            return new ResponseEntity<LinkResource>(new LinkResource(linkService.createLink(url)), HttpStatus.CREATED);
         } catch (LinkExistsException e) {
-            throw new ConflictException(e);
+            return new ResponseEntity<LinkResource>(HttpStatus.CONFLICT);
+        } catch (LinkBadUrlException e) {
+            return new ResponseEntity<LinkResource>(HttpStatus.BAD_REQUEST);
         }
     }
 
